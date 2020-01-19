@@ -10,10 +10,15 @@ from sklearn.metrics import classification_report
 import seaborn as sns
 import matplotlib.pyplot as plt
 import time
+
 start_time = time.time()
+n_samples = 100
+n_features = 20
+n_informative = 5
+n_redundant = 2
+n_repeated = 2
 
-
-X, y = make_classification(100000, 100, 25, 10, 5)
+X, y = make_classification(n_samples, n_features, n_informative, n_redundant, n_repeated)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
 
