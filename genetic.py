@@ -1,5 +1,5 @@
 import numpy as np
-
+from sklearn.linear_model import LogisticRegression
 
 n_features = 20
 
@@ -19,7 +19,16 @@ def reduce_features(solution, features):
     return reduced_features
 
 
-def pop_fitness(X_train, X_test, y_train, y_test, algorithm, population):
-    accuracies = numpy.zeros(population.shape[0])
+def pop_fitness(X_train, X_test, y_train, y_test, logreg, population):
+    accuracies = np.zeros(population.shape[0])
     idx = 0
 
+    for sample in population:
+        reduced_features = reduce_features(sample,  X_train)
+        X_train_data = reduced_features[X_train, :]
+        X_test_data = reduced_features[X_test, :]
+
+        logreg.fit(X_train_data, y_train)
+        accuracies[idx] = logreg.score(X_test_data, y_test)
+        idx = idx + 1
+    return accuracies

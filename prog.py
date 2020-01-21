@@ -22,11 +22,11 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 logreg = LogisticRegression(solver='lbfgs')
 logreg.fit(X_train, y_train)
 
-y_pred = logreg.predict(X_test)
+#y_pred = logreg.predict(X_test)
 print('Accuracy of logistic regression: {:.2f}'.format(logreg.score(X_test, y_test)))
-confusion_matrix = confusion_matrix(y_test, y_pred)
-print(confusion_matrix)
-print(classification_report(y_test, y_pred))
+#confusion_matrix = confusion_matrix(y_test, y_pred)
+#print(confusion_matrix)
+#print(classification_report(y_test, y_pred))
 
 """
 
