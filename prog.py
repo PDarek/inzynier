@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_classification
@@ -8,6 +9,7 @@ from sklearn.metrics import classification_report
 import seaborn as sns
 import matplotlib.pyplot as plt
 import time
+import genetic
 
 start_time = time.time()
 n_samples = 100
@@ -16,19 +18,38 @@ n_informative = 5
 n_redundant = 2
 n_repeated = 2
 
+
 X, y = make_classification(n_samples, n_features, n_informative, n_redundant, n_repeated)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-logreg = LogisticRegression(solver='lbfgs')
-logreg.fit(X_train, y_train)
+#genetic algorithm parameters
+population_size = 8 # Population size.
+num_parents_mating = 4 # Number of parents inside the mating pool.
+mutations = 3 # Number of elements to mutate.
 
-#y_pred = logreg.predict(X_test)
-print('Accuracy of logistic regression: {:.2f}'.format(logreg.score(X_test, y_test)))
-#confusion_matrix = confusion_matrix(y_test, y_pred)
-#print(confusion_matrix)
-#print(classification_report(y_test, y_pred))
+population_shape = (population_size, n_features)
+#Starting population
+new_population = np.random.randint(2, size=population_shape)
+
+best_outputs = []
+number_generations = 1
+
+for generation in range(number_generations):
+    print("Generation : ", generation)
+    # Measuring the fitness of each chromosome in the population.
+    fitness = genetic.pop_fitness(X_train, X_test, y_train, y_test, new_population)
+
+    best_outputs.append(np.max(fitness))
+    # The best result in the current iteration.
+    print("Best result : ", best_outputs[-1])
 
 """
+
+y_pred = logreg.predict(X_test)
+print('Accuracy of logistic regression: {:.2f}'.format(logreg.score(X_test, y_test)))
+confusion_matrix = confusion_matrix(y_test, y_pred)
+print(confusion_matrix)
+print(classification_report(y_test, y_pred))
 
 plt.rc("font", size=14)
 sns.set(style="white")
