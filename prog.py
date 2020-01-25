@@ -12,36 +12,77 @@ import time
 import genetic
 
 start_time = time.time()
-n_samples = 100
-n_features = 20
-n_informative = 5
-n_redundant = 2
-n_repeated = 2
+# make classification parameters
+n_samples = 10000
+n_features = 200
+n_informative = 50
+n_redundant = 10
+n_repeated = 3
 
+# genetic algorithm parameters
+population_size = 100  # Population size.
+n_parents = 50  # Number of parents inside the mating pool.
+n_mutations = 3  # Number of elements to mutate.
+n_generations = 1000  # Number of generations.
 
 X, y = make_classification(n_samples, n_features, n_informative, n_redundant, n_repeated)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-#genetic algorithm parameters
-population_size = 8 # Population size.
-num_parents_mating = 4 # Number of parents inside the mating pool.
-mutations = 3 # Number of elements to mutate.
-
 population_shape = (population_size, n_features)
-#Starting population
+# Starting population
+
 new_population = np.random.randint(2, size=population_shape)
 
-best_outputs = []
-number_generations = 1
+best_outputs = [] #table for best outputs in every generation
 
-for generation in range(number_generations):
+for generation in range(n_generations):
     print("Generation : ", generation)
-    # Measuring the fitness of each chromosome in the population.
+    #Measuring the fitness of each chromosome in the population.
+    calculation_time = time.time()
     fitness = genetic.pop_fitness(X_train, X_test, y_train, y_test, new_population)
-
+    print('Generation calculation time : ', time.time()-calculation_time)
     best_outputs.append(np.max(fitness))
-    # The best result in the current iteration.
+
+    print('Number of creatures with best fitness : ', (fitness == np.max(fitness)).sum())
+
+    #The best result in the current generation.
     print("Best result : ", best_outputs[-1])
+
+    # Selecting the best parents for mating.
+    parents = genetic.select_mating_pool(new_population, fitness, n_parents)
+
+    # Generating next generation.
+    offspring_crossover = genetic.crossover(parents, offspring_size=(population_shape[0]-parents.shape[0], n_features))
+
+    # Adding some variations to the offspring using mutation.
+    offspring_mutation = genetic.mutation(offspring_crossover, n_mutations)
+
+    # Creating the new population based on the parents and offspring.
+    new_population[0:parents.shape[0], :] = parents
+    new_population[parents.shape[0]:, :] = offspring_mutation
+
+
+# Getting the best solution after finishing all generations.
+# At first, the fitness is calculated for each solution in the final generation.
+fitness = genetic.pop_fitness(X_train, X_test, y_train, y_test, new_population)
+# Then return the index of that solution corresponding to the best fitness.
+best_match_idx = np.where(fitness == np.max(fitness))[0]
+best_match_idx = best_match_idx[0]
+
+best_solution = new_population[best_match_idx, :]
+best_solution_indices = np.flatnonzero(best_solution)
+best_solution_num_elements = best_solution_indices.shape[0]
+best_solution_fitness = fitness[best_match_idx]
+
+print("best_match_idx : ", best_match_idx)
+print("best_solution : ", best_solution)
+print("Selected indices : ", best_solution_indices)
+print("Number of selected elements : ", best_solution_num_elements)
+print("Best solution fitness : ", best_solution_fitness)
+
+plt.plot(best_outputs)
+plt.xlabel("Generation")
+plt.ylabel("Fitness")
+plt.show()
 
 """
 
@@ -70,4 +111,4 @@ plt.show()
 
 """
 
-print("--- %s seconds ---" % (time.time() - start_time))
+print("Whole program took %s seconds " % (time.time() - start_time))
