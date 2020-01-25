@@ -1,7 +1,7 @@
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
@@ -23,7 +23,7 @@ n_repeated = 3
 population_size = 100  # Population size.
 n_parents = 50  # Number of parents inside the mating pool.
 n_mutations = 3  # Number of elements to mutate.
-n_generations = 1000  # Number of generations.
+n_generations = 10# Number of generations.
 
 X, y = make_classification(n_samples, n_features, n_informative, n_redundant, n_repeated)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -32,11 +32,15 @@ population_shape = (population_size, n_features)
 
 new_population = np.random.randint(2, size=population_shape)
 
-best_outputs = [] #table for best outputs in every generation
+best_outputs = []  # Table for best outputs in every generation
 
+logreg = LogisticRegression(penalty='none', solver='lbfgs', max_iter=10000, random_state=42)
+logreg.fit(X_train, y_train)
+raw_logreg_score = logreg.score(X_test, y_test)
+print('Fitness of raw logistic regression : ', raw_logreg_score)
 for generation in range(n_generations):
     print("Generation : ", generation)
-    #Measuring the fitness of each chromosome in the population.
+    # Measuring the fitness of each chromosome in the population.
     calculation_time = time.time()
     fitness = genetic.pop_fitness(X_train, X_test, y_train, y_test, new_population)
     print('Generation calculation time : ', time.time()-calculation_time)
@@ -44,7 +48,7 @@ for generation in range(n_generations):
 
     print('Number of creatures with best fitness : ', (fitness == np.max(fitness)).sum())
 
-    #The best result in the current generation.
+    # The best result in the current generation.
     print("Best result : ", best_outputs[-1])
 
     # Selecting the best parents for mating.
@@ -79,9 +83,12 @@ print("Selected indices : ", best_solution_indices)
 print("Number of selected elements : ", best_solution_num_elements)
 print("Best solution fitness : ", best_solution_fitness)
 
-plt.plot(best_outputs)
+plt.figure()
+plt.plot(best_outputs, label='Genetic algorithm')
+plt.axhline(y=raw_logreg_score, xmin=0, xmax=n_generations, color='r', linestyle='--', label='Raw logit')
 plt.xlabel("Generation")
 plt.ylabel("Fitness")
+plt.legend(loc="lower right")
 plt.show()
 
 """
