@@ -33,7 +33,7 @@ new_population = np.random.randint(2, size=population_shape)
 
 best_outputs = []  # Table for best outputs score in every generation
 
-raw_logreg = LogisticRegression(penalty='l2', solver='newton-cg', max_iter=1000, random_state=42)
+raw_logreg = LogisticRegression(penalty='none', solver='newton-cg', max_iter=1000, random_state=42)
 raw_logreg.fit(X_train, y_train)
 y_pred = raw_logreg.predict(X_test)
 

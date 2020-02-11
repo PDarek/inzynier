@@ -15,7 +15,7 @@ def pop_fitness(X_train, X_test, y_train, y_test, population):
         X_train_reduced = reduce_features(creature, X_train)
         X_test_reduced = reduce_features(creature, X_test)
 
-        logreg = LogisticRegression(penalty='l2', solver='newton-cg', max_iter=1000, random_state=42)
+        logreg = LogisticRegression(penalty='none', solver='newton-cg', max_iter=1000, random_state=42)
         logreg.fit(X_train_reduced, y_train)
         accuracies[idx] = logreg.score(X_test_reduced, y_test)
         idx = idx + 1
