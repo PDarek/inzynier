@@ -6,7 +6,6 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
 from sklearn.metrics import classification_report
-import seaborn as sns
 import matplotlib.pyplot as plt
 import time
 import genetic
@@ -14,16 +13,16 @@ import genetic
 start_time = time.time()
 # make classification parameters
 n_samples = 10000
-n_features = 200
+n_features = 63
 n_informative = 50
 n_redundant = 10
 n_repeated = 3
 
 # genetic algorithm parameters
-population_size = 100  # Population size.
-n_parents = 50  # Number of parents inside the mating pool.
+population_size = 80  # Population size.
+n_parents = population_size // 2  # Number of parents inside the mating pool.
 n_mutations = 3  # Number of elements to mutate.
-n_generations = 10# Number of generations.
+n_generations = 60  # Number of generations.
 
 X, y = make_classification(n_samples, n_features, n_informative, n_redundant, n_repeated)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -32,14 +31,20 @@ population_shape = (population_size, n_features)
 
 new_population = np.random.randint(2, size=population_shape)
 
-best_outputs = []  # Table for best outputs in every generation
+best_outputs = []  # Table for best outputs score in every generation
 
-logreg = LogisticRegression(penalty='none', solver='lbfgs', max_iter=10000, random_state=42)
-logreg.fit(X_train, y_train)
-raw_logreg_score = logreg.score(X_test, y_test)
+raw_logreg = LogisticRegression(penalty='l2', solver='newton-cg', max_iter=1000, random_state=42)
+raw_logreg.fit(X_train, y_train)
+y_pred = raw_logreg.predict(X_test)
+
+raw_logreg_score = raw_logreg.score(X_test, y_test)
+raw_logit_roc_auc = roc_auc_score(y_test, raw_logreg.predict(X_test))
+raw_fpr, raw_tpr, raw_thresholds = roc_curve(y_test, raw_logreg.predict_proba(X_test)[:, 1])
+
 print('Fitness of raw logistic regression : ', raw_logreg_score)
+
 for generation in range(n_generations):
-    print("Generation : ", generation)
+    print("Generation : ", generation+1)
     # Measuring the fitness of each chromosome in the population.
     calculation_time = time.time()
     fitness = genetic.pop_fitness(X_train, X_test, y_train, y_test, new_population)
@@ -63,7 +68,6 @@ for generation in range(n_generations):
     # Creating the new population based on the parents and offspring.
     new_population[0:parents.shape[0], :] = parents
     new_population[parents.shape[0]:, :] = offspring_mutation
-
 
 # Getting the best solution after finishing all generations.
 # At first, the fitness is calculated for each solution in the final generation.
@@ -99,9 +103,6 @@ confusion_matrix = confusion_matrix(y_test, y_pred)
 print(confusion_matrix)
 print(classification_report(y_test, y_pred))
 
-plt.rc("font", size=14)
-sns.set(style="white")
-sns.set(style="whitegrid", color_codes=True)
 logit_roc_auc = roc_auc_score(y_test, logreg.predict(X_test))
 fpr, tpr, thresholds = roc_curve(y_test, logreg.predict_proba(X_test)[:, 1])
 plt.figure()
@@ -118,4 +119,4 @@ plt.show()
 
 """
 
-print("Whole program took %s seconds " % (time.time() - start_time))
+print("Program took %s seconds " % (time.time() - start_time))

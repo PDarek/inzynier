@@ -15,7 +15,7 @@ def pop_fitness(X_train, X_test, y_train, y_test, population):
         X_train_reduced = reduce_features(creature, X_train)
         X_test_reduced = reduce_features(creature, X_test)
 
-        logreg = LogisticRegression(penalty='none', solver='lbfgs', max_iter=10000, random_state=42)
+        logreg = LogisticRegression(penalty='l2', solver='newton-cg', max_iter=1000, random_state=42)
         logreg.fit(X_train_reduced, y_train)
         accuracies[idx] = logreg.score(X_test_reduced, y_test)
         idx = idx + 1
@@ -51,9 +51,10 @@ def crossover(parents, offspring_size):
 
 
 def mutation(offspring, n_mutations=2):
-    mutation_idx = np.random.randint(low=0, high=offspring.shape[1], size=n_mutations)
+#    mutation_idx = np.random.randint(low=0, high=offspring.shape[1], size=n_mutations)
     # Mutation changes a single gene in each offspring randomly.
     for idx in range(offspring.shape[0]):
         # The random value to be added to the gene.
+        mutation_idx = np.random.randint(low=0, high=offspring.shape[1], size=n_mutations)
         offspring[idx, mutation_idx] = 1 - offspring[idx, mutation_idx]
     return offspring
